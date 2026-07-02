@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="1921 Express — El primer restaurante itinerante de alta cocina de Colombia. Una velada inmersiva sobre rieles, de Bogotá a Zipaquirá.">
+<title>1921 Express — Alta Cocina sobre Rieles</title>
+<link rel="icon" type="image/png" href="./images/ICON.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────────
+   RESET & ROOT
+───────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* MAIN: Dark Red Wine (primary backgrounds) */
+  --wine:       #160306;
+  --wine-mid:   #1F0509;
+  --wine-deep:  #0D0204;
+
+  /* ACCENT: Midnight Navy Blue (accent sections) */
+  --navy:       #07111D;
+  --navy-mid:   #0D1B2A;
+  --navy-deep:  #050E17;
+
+  /* GOLD */
+  --gold:       #C9A84C;
+  --gold-light: #E2C57A;
+  --gold-dim:   rgba(201,168,76,0.25);
+
+  /* NEUTRALS */
+  --cream:      #F5EFE0;
+  --cream-dim:  #D8CCBA;
+  --white:      #FFFFFF;
+  --black:      #0A0A0A;
+
+  --ff-serif: 'Cormorant Garamond', Georgia, serif;
+  --ff-sans:  'Montserrat', system-ui, sans-serif;
+
+  --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-circ: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: var(--ff-sans);
+  background: var(--wine);
+  color: var(--cream);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+img { display: block; max-width: 100%; }
+a { text-decoration: none; color: inherit; }
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--wine-deep); }
+::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 2px; }
+
+/* ─────────────────────────────────────────────
+   TYPOGRAPHY
+───────────────────────────────────────────── */
+.t-eyebrow {
+  font-family: var(--ff-sans);
+  font-size: 0.6rem;
+  font-weight: 300;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.t-display {
+  font-family: var(--ff-serif);
+  font-size: clamp(2.4rem, 5.5vw, 4.8rem);
+  font-weight: 300;
+  line-height: 1.08;
+  letter-spacing: 0.01em;
+}
+.t-display em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--gold-light);
+}
+.t-body {
+  font-family: var(--ff-serif);
+  font-size: clamp(1rem, 1.4vw, 1.18rem);
+  font-weight: 300;
+  line-height: 1.95;
+  font-style: italic;
+  color: var(--cream-dim);
+}
+
+/* ─────────────────────────────────────────────
+   ORNAMENTS
+───────────────────────────────────────────── */
+.ornament {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 18px 0;
+}
+.orn-line {
+  height: 1px;
+  width: 80px;
+  background: linear-gradient(90deg, transparent, var(--gold));
+}
+.orn-line.rev { background: linear-gradient(90deg, var(--gold), transparent); }
+.orn-diamond {
+  width: 5px; height: 5px;
+  border: 1px solid var(--gold);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+.orn-diamond.fill { background: var(--gold); }
+
+/* ─────────────────────────────────────────────
+   SCROLL REVEAL
+───────────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(36px);
+  transition: opacity 1s var(--ease-out), transform 1s var(--ease-out);
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal.d1 { transition-delay: 0.12s; }
+.reveal.d2 { transition-delay: 0.24s; }
+.reveal.d3 { transition-delay: 0.36s; }
+.reveal.d4 { transition-delay: 0.48s; }
+
+/* ─────────────────────────────────────────────
+   RAIL PROGRESS
+───────────────────────────────────────────── */
+#rail-progress {
+  position: fixed;
+  right: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 0.6s;
+}
+#rail-progress.show { opacity: 1; }
+.rail-dot {
+  width: 5px; height: 5px;
+  border: 1px solid rgba(201,168,76,0.4);
+  transform: rotate(45deg);
+  cursor: pointer;
+  transition: background 0.3s, border-color 0.3s;
+}
+.rail-dot.active { background: var(--gold); border-color: var(--gold); }
+.rail-dot:hover { border-color: var(--gold); }
+
+/* ─────────────────────────────────────────────
+   NAVIGATION
+───────────────────────────────────────────── */
+#nav {
+  position: fixed; top: 0; left: 0; width: 100%;
+  z-index: 900;
+  padding: 0 56px;
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.7s var(--ease-out), border-color 0.7s;
+  border-bottom: 1px solid transparent;
+}
+#nav.scrolled {
+  background: rgba(13,2,4,0.94);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-color: rgba(201,168,76,0.15);
+}
+.nav-logo { height: 44px; transition: filter 0.3s; }
+.nav-logo:hover { filter: brightness(1.15); }
+.nav-links { list-style: none; display: flex; align-items: center; gap: 36px; }
+.nav-links a {
+  font-size: 0.6rem; font-weight: 300;
+  letter-spacing: 0.32em; text-transform: uppercase;
+  color: rgba(245,239,224,0.8);
+  transition: color 0.3s;
+  position: relative; padding-bottom: 3px;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute; left: 0; bottom: 0;
+  width: 0; height: 1px;
+  background: var(--gold);
+  transition: width 0.4s var(--ease-out);
+}
+.nav-links a:hover { color: var(--gold); }
+.nav-links a:hover::after { width: 100%; }
+.nav-cta {
+  border: none
+  padding: 9px 22px;
+  color: var(--gold) !important;
+  transition: background 0.35s, color 0.35s !important;
+}
+.nav-cta:hover {color: var(--white) !important; }
+.nav-cta::after { display: none !important; }
+
+/* ─────────────────────────────────────────────
+   HERO
+───────────────────────────────────────────── */
+#hero {
+  position: relative; width: 100%; height: 100vh; min-height: 640px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  overflow: hidden; background: var(--wine-deep);
+}
+/*
+  VIDEO PLACEHOLDER — Replace hero-bg-img with:
+  <video class="hero-bg-img" autoplay muted loop playsinline>
+    <source src="./video/hero.mp4" type="video/mp4">
+  </video>
+*/
+.hero-bg-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; opacity: 0.44;
+  transform: scale(1.04);
+  animation: heroKen 22s ease-in-out infinite alternate;
+}
+@keyframes heroKen {
+  from { transform: scale(1.04); }
+  to   { transform: scale(1.12); }
+}
+.hero-grad {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(13,2,4,0.45) 0%, rgba(13,2,4,0.05) 38%, rgba(13,2,4,0.72) 78%, var(--wine-deep) 100%),
+    linear-gradient(to right, rgba(13,2,4,0.38) 0%, transparent 60%);
+}
+.hero-content {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column;
+  align-items: center; text-align: center;
+}
+.hero-logo {
+  width: clamp(180px, 28vw, 320px);
+  opacity: 0; transform: translateY(22px);
+  animation: fadeUp 1.6s 0.5s var(--ease-circ) forwards;
+  filter: drop-shadow(0 0 40px rgba(201,168,76,0.22));
+}
+.hero-sep {
+  width: 1px; height: 0;
+  background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+  margin: 28px auto;
+  animation: growLine 1.2s 1.4s var(--ease-out) forwards;
+}
+@keyframes growLine { to { height: 56px; } }
+.hero-tagline {
+  font-family: var(--ff-serif);
+  font-size: clamp(0.95rem, 1.6vw, 1.2rem);
+  font-style: italic; font-weight: 300;
+  letter-spacing: 0.08em; color: var(--cream);
+  opacity: 0; animation: fadeUp 1.4s 1.2s var(--ease-circ) forwards;
+}
+.hero-sub {
+  margin-top: 10px;
+  font-size: 0.55rem; font-weight: 300;
+  letter-spacing: 0.48em; text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0; animation: fadeUp 1.4s 1.55s var(--ease-circ) forwards;
+}
+@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+.scroll-cue {
+  position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+  z-index: 2; display: flex; flex-direction: column;
+  align-items: center; gap: 10px; cursor: pointer;
+  opacity: 0; animation: fadeIn 1s 2.2s forwards;
+  transition: opacity 0.3s;
+}
+.scroll-cue:hover { opacity: 0.65 !important; }
+.scroll-cue-label {
+  font-size: 0.48rem; letter-spacing: 0.45em;
+  text-transform: uppercase; color: var(--gold);
+}
+.scroll-cue-track {
+  width: 1px; height: 52px;
+  background: linear-gradient(to bottom, var(--gold) 0%, transparent 100%);
+  animation: trackPulse 2.2s var(--ease-out) infinite;
+}
+@keyframes trackPulse {
+  0%,100% { opacity: 1; transform: scaleY(1); transform-origin: top; }
+  50%      { opacity: 0.3; transform: scaleY(0.6); transform-origin: top; }
+}
+@keyframes fadeIn { to { opacity: 1; } }
+
+/* ─────────────────────────────────────────────
+   SECTION BASE
+───────────────────────────────────────────── */
+.sec { position: relative; }
+.sec-inner { max-width: 1380px; margin: 0 auto; padding: 0 72px; }
+
+/* ─────────────────────────────────────────────
+   BTN OUTLINE
+───────────────────────────────────────────── */
+.btn-outline {
+  display: inline-block;
+  margin-top: 48px; padding: 15px 48px;
+  border: 1px solid rgba(201,168,76,0.55);
+  color: var(--gold);
+  font-size: 0.58rem; font-weight: 300;
+  letter-spacing: 0.4em; text-transform: uppercase;
+  transition: background 0.4s var(--ease-out), color 0.4s, border-color 0.4s;
+  cursor: pointer;
+}
+.btn-outline:hover {
+  background: var(--gold); color: var(--wine); border-color: var(--gold);
+}
+
+/* ─────────────────────────────────────────────
+   § I — EXPERIENCIA
+───────────────────────────────────────────── */
+#experiencia { background: var(--wine); padding: 140px 0; }
+.exp-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 100px; align-items: center;
+}
+.exp-text { padding-right: 20px; }
+.exp-text .t-body { margin-top: 32px; }
+.exp-text .t-body + .t-body { margin-top: 18px; }
+.exp-img-wrap { position: relative; }
+.exp-img-wrap::before {
+  content: '';
+  position: absolute; top: -18px; right: -18px;
+  width: 100%; height: 100%;
+  border: 1px solid var(--gold-dim);
+  pointer-events: none; z-index: 0;
+}
+.exp-img-wrap img {
+  position: relative; z-index: 1;
+  width: 100%; height: 600px; object-fit: cover;
+}
+
+/* ─────────────────────────────────────────────
+   § II — HISTORIA
+───────────────────────────────────────────── */
+#historia { background: var(--navy); padding: 140px 0; }
+.hist-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 100px; align-items: center;
+}
+.hist-img img { width: 100%; height: 580px; object-fit: cover; }
+.hist-text { padding-left: 20px; }
+.hist-text .t-body { margin-top: 32px; color: rgba(245,239,224,0.75); }
+.hist-text .t-body + .t-body { margin-top: 18px; }
+
+/* ─────────────────────────────────────────────
+   § III — LEGADO
+───────────────────────────────────────────── */
+#legado { background: var(--wine-mid); padding: 140px 0; }
+.legado-hdr { text-align: center; max-width: 700px; margin: 0 auto 90px; }
+.legado-hdr .ornament { justify-content: center; }
+.legado-cards {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 1px; background: rgba(201,168,76,0.12);
+}
+.legado-card {
+  background: var(--wine-mid); padding: 56px 48px;
+  position: relative; overflow: hidden;
+  transition: background 0.45s var(--ease-out);
+}
+.legado-card:hover { background: var(--wine); }
+.legado-card::before {
+  content: '';
+  position: absolute; left: 0; top: 0;
+  width: 0; height: 100%;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+  opacity: 0.55;
+  transition: width 0.55s var(--ease-out);
+}
+.legado-card:hover::before { width: 2px; }
+.lc-era {
+  font-family: var(--ff-serif); font-size: 4.5rem; font-weight: 300;
+  color: rgba(201,168,76,0.1); line-height: 1; margin-bottom: 20px; user-select: none;
+}
+.lc-title {
+  font-family: var(--ff-serif); font-size: 1.45rem; font-weight: 500;
+  color: var(--gold-light); margin-bottom: 14px;
+}
+.lc-body {
+  font-family: var(--ff-serif); font-size: 1rem; font-weight: 300;
+  font-style: italic; line-height: 1.85; color: var(--cream-dim);
+}
+
+/* ─────────────────────────────────────────────
+   § IV — EL TREN (moodboard collage, navy)
+───────────────────────────────────────────── */
+.tren-mood-sec { background: var(--navy); padding: 160px 0; overflow: hidden; }
+.tren-mood {
+  position: relative;
+  max-width: 1320px;
+  margin: 0 auto;
+  min-height: 900px;
+  padding: 0 40px;
+}
+.tm-img {
+  position: absolute;
+  overflow: hidden;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.55);
+}
+.tm-img img {
+  width: 100%; height: 100%; object-fit: cover;
+  display: block;
+  transition: transform 0.9s var(--ease-out);
+}
+.tm-img:hover img { transform: scale(1.06); }
+
+.tm-img-1 { left: 0;    top: 20px;  width: 38%; height: 460px; z-index: 2; }
+.tm-img-2 { left: 8%;   top: 420px; width: 30%; height: 320px; z-index: 3; border: 1px solid rgba(201,168,76,0.25); }
+.tm-img-3 { left: 67%;  top: 0;     width: 33%; height: 380px; z-index: 1; }
+.tm-img-4 { left: 77%;  top: 360px; width: 23%; height: 480px; z-index: 2; border: 1px solid rgba(201,168,76,0.25); }
+
+.tren-mood-text {
+  position: absolute;
+  left: 41%; top: 60px;
+  width: 25%;
+  z-index: 4;
+}
+.tren-mood-text .t-eyebrow { display: flex; align-items: center; gap: 10px; }
+.tm-diamond {
+  display: inline-block; width: 5px; height: 5px;
+  border: 1px solid var(--gold); transform: rotate(45deg); background: var(--gold);
+}
+.tren-mood-text .detail-items { margin-top: 40px; display: flex; flex-direction: column; gap: 30px; }
+.detail-item { display: flex; gap: 22px; align-items: flex-start; }
+.di-bar {
+  flex-shrink: 0; width: 1px; min-height: 60px;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+  margin-top: 4px;
+}
+.di-title {
+  font-family: var(--ff-serif); font-size: 1.15rem; font-weight: 500;
+  color: var(--gold-light); margin-bottom: 8px;
+}
+.di-body {
+  font-family: var(--ff-serif); font-size: 0.95rem; font-weight: 300;
+  font-style: italic; line-height: 1.78; color: var(--cream-dim);
+}
+
+/* ─────────────────────────────────────────────
+   § V — MENÚ
+───────────────────────────────────────────── */
+#menu { background: var(--cream); padding: 140px 0; color: var(--black); }
+#menu .t-eyebrow { color: var(--navy-mid); }
+#menu .t-display { color: var(--navy-mid); }
+#menu .t-display em { color: var(--wine-mid); }
+.menu-hdr { text-align: center; max-width: 700px; margin: 0 auto 90px; }
+.menu-hdr .ornament { justify-content: center; }
+.menu-hdr .orn-diamond { border-color: var(--navy-mid); }
+.menu-hdr .orn-diamond.fill { background: var(--navy-mid); }
+.menu-hdr .orn-line { background: linear-gradient(90deg, transparent, var(--navy-mid)); }
+.menu-hdr .orn-line.rev { background: linear-gradient(90deg, var(--navy-mid), transparent); }
+.menu-courses {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 1px; background: #D8CCBA;
+}
+.mc {
+  background: var(--cream); padding: 52px 40px;
+  position: relative; overflow: hidden; cursor: default;
+  transition: background 0.45s var(--ease-out);
+}
+.mc:hover { background: var(--wine-mid); }
+.mc-num {
+  font-family: var(--ff-serif); font-size: 4.2rem; font-weight: 300;
+  color: rgba(7,17,29,0.08); line-height: 1; margin-bottom: 6px;
+  transition: color 0.4s;
+}
+.mc:hover .mc-num { color: rgba(245,239,224,0.09); }
+.mc-label {
+  font-size: 0.52rem; font-weight: 300;
+  letter-spacing: 0.38em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 10px;
+}
+.mc-title {
+  font-family: var(--ff-serif); font-size: 1.35rem; font-weight: 500;
+  color: var(--navy-mid); margin-bottom: 14px; transition: color 0.4s;
+}
+.mc:hover .mc-title { color: var(--gold-light); }
+.mc-body {
+  font-family: var(--ff-serif); font-size: 0.97rem; font-weight: 300;
+  font-style: italic; line-height: 1.85; color: #3A3A5A;
+  transition: color 0.4s;
+}
+.mc:hover .mc-body { color: rgba(245,239,224,0.7); }
+.menu-chef-strip {
+  margin-top: 80px; border: 1px solid rgba(7,17,29,0.16);
+  padding: 60px; text-align: center;
+}
+.mcs-eyebrow {
+  font-size: 0.55rem; font-weight: 300;
+  letter-spacing: 0.45em; text-transform: uppercase;
+  color: var(--navy-mid); margin-bottom: 14px;
+}
+.mcs-name {
+  font-family: var(--ff-serif);
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 400; color: var(--wine-mid); font-style: italic;
+}
+.mcs-desc {
+  margin-top: 14px; font-family: var(--ff-serif);
+  font-size: 1rem; font-weight: 300; font-style: italic;
+  color: #4A4A6A; line-height: 1.7;
+}
+
+/* ─────────────────────────────────────────────
+   § VI — LA RUTA (interactive image map)
+───────────────────────────────────────────── */
+#ruta { background: var(--wine); padding: 140px 0 0; }
+
+.ruta-top {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0; align-items: stretch; margin-bottom: 0;
+}
+
+/* Left: interactive image panel */
+.ruta-img-panel {
+  position: relative; overflow: hidden;
+  min-height: 680px;
+}
+.ruta-img-panel .rp-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover;
+  opacity: 0; transition: opacity 0.65s var(--ease-out);
+}
+.ruta-img-panel .rp-img.active { opacity: 0.65; }
+.ruta-img-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(22,3,6,0) 50%, var(--wine) 100%);
+  pointer-events: none; z-index: 1;
+}
+.ruta-img-caption {
+  position: absolute; bottom: 40px; left: 40px; z-index: 2;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 0.5s, transform 0.5s;
+}
+.ruta-img-caption.show { opacity: 1; transform: translateY(0); }
+.ruta-img-caption .ric-loc {
+  font-size: 0.52rem; letter-spacing: 0.4em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 6px;
+}
+.ruta-img-caption .ric-name {
+  font-family: var(--ff-serif); font-size: 1.5rem;
+  font-weight: 400; color: var(--cream);
+}
+
+/* Right: stops list */
+.ruta-text {
+  padding: 0 60px 60px 60px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.ruta-text-hdr { margin-bottom: 48px; }
+
+.route-stops { position: relative; }
+.route-track {
+  position: absolute; left: 7px; top: 18px; bottom: 18px;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--gold), rgba(201,168,76,0.08));
+}
+.route-stop {
+  display: flex; gap: 28px; margin-bottom: 0;
+  align-items: flex-start; padding: 20px 12px;
+  cursor: pointer;
+  transition: background 0.3s;
+  border-radius: 2px;
+}
+.route-stop:hover { background: rgba(201,168,76,0.05); }
+.route-stop.rs-active { background: rgba(201,168,76,0.07); }
+.rs-dot-wrap { position: relative; z-index: 1; padding-top: 3px; }
+.rs-dot {
+  width: 15px; height: 15px;
+  border: 1px solid rgba(201,168,76,0.35);
+  border-radius: 50%; background: var(--wine);
+  flex-shrink: 0;
+  transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+}
+.route-stop.rs-active .rs-dot,
+.route-stop:hover .rs-dot {
+  border-color: var(--gold); background: var(--gold);
+  box-shadow: 0 0 0 4px rgba(201,168,76,0.12);
+}
+.rs-name {
+  font-family: var(--ff-serif); font-size: 1.2rem;
+  font-weight: 500; color: var(--gold-light); margin-bottom: 5px;
+  transition: color 0.3s;
+}
+.route-stop:hover .rs-name { color: var(--gold); }
+.rs-desc {
+  font-family: var(--ff-serif); font-size: 0.95rem;
+  font-weight: 300; font-style: italic;
+  line-height: 1.75; color: var(--cream-dim);
+}
+
+/* Catedral de Sal feature */
+.catedral-feature {
+  position: relative; height: 70vh; min-height: 500px; overflow: hidden;
+}
+.cf-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.55; }
+.cf-veil {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(7,17,29,0.94) 0%, rgba(7,17,29,0.35) 55%, rgba(7,17,29,0.15) 100%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-end;
+  padding: 80px 48px; text-align: center;
+}
+.cf-veil .t-display { color: var(--cream); font-size: clamp(2rem,4vw,3.6rem); }
+.cf-veil .t-body { max-width: 580px; margin-top: 20px; text-align: center; }
+
+/* ─────────────────────────────────────────────
+   § VI.5 — DÍA Y NOCHE (new section)
+───────────────────────────────────────────── */
+#horario {
+  position: relative; overflow: hidden;
+}
+.hn-grid { display: grid; grid-template-columns: 1fr 1fr; min-height: 620px; }
+
+.hn-side {
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column;
+  justify-content: flex-end; padding: 72px 64px;
+  cursor: default;
+}
+
+/* Day = wine red */
+.hn-side.day { background: var(--wine-mid); }
+/* Night = midnight navy */
+.hn-side.night { background: var(--navy-mid); }
+
+.hn-bg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.7s var(--ease-out);
+}
+.hn-side:hover .hn-bg { opacity: 0.38; }
+
+/* Day divider */
+.hn-divider {
+  position: absolute; top: 0; right: 0; bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+}
+
+.hn-content { position: relative; z-index: 2; }
+
+.hn-label {
+  font-size: 0.55rem; font-weight: 300;
+  letter-spacing: 0.48em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 14px;
+}
+.hn-title {
+  font-family: var(--ff-serif);
+  font-size: clamp(1.8rem, 3.5vw, 3rem);
+  font-weight: 300; color: var(--cream);
+  line-height: 1.1; margin-bottom: 24px;
+}
+.hn-title em { font-style: italic; color: var(--gold-light); }
+.hn-body {
+  font-family: var(--ff-serif); font-size: 1rem;
+  font-weight: 300; font-style: italic;
+  line-height: 1.85; color: var(--cream-dim);
+  max-width: 420px;
+}
+
+.hn-side.day .hn-ornament-bar {
+  width: 40px; height: 1px;
+  background: var(--gold); margin-bottom: 22px;
+}
+.hn-side.night .hn-ornament-bar {
+  width: 40px; height: 1px;
+  background: var(--gold); margin-bottom: 22px;
+}
+
+.hn-icon {
+  font-size: 0.6rem; letter-spacing: 0.28em;
+  text-transform: uppercase; color: rgba(201,168,76,0.45);
+  margin-top: 32px;
+}
+
+/* ─────────────────────────────────────────────
+   § VII — TARIFAS
+───────────────────────────────────────────── */
+#tarifas { background: var(--navy); padding: 140px 0; }
+.tar-hdr { text-align: center; max-width: 640px; margin: 0 auto 90px; }
+.tar-hdr .ornament { justify-content: center; }
+.tar-hdr .t-body { margin-top: 24px; color: rgba(245,239,224,0.7); }
+.tar-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px; background: rgba(201,168,76,0.18);
+  max-width: 960px; margin: 0 auto;
+}
+.tar-card {
+  background: rgba(7,17,29,0.55); padding: 60px 56px;
+  border: 1px solid rgba(201,168,76,0.1);
+  transition: border-color 0.45s, background 0.45s;
+}
+.tar-card:hover {
+  border-color: rgba(201,168,76,0.4);
+  background: rgba(7,17,29,0.8);
+}
+.tc-label {
+  font-size: 0.55rem; font-weight: 300;
+  letter-spacing: 0.4em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 12px;
+}
+.tc-title {
+  font-family: var(--ff-serif); font-size: 1.6rem;
+  font-weight: 400; color: var(--cream); margin-bottom: 22px;
+}
+.tc-price {
+  font-family: var(--ff-serif); font-size: 2.2rem;
+  font-weight: 300; color: var(--gold-light);
+  line-height: 1.2; margin-bottom: 10px;
+}
+.tc-note {
+  font-family: var(--ff-serif); font-size: 0.92rem;
+  font-style: italic; font-weight: 300;
+  color: rgba(245,239,224,0.6); line-height: 1.6; margin-bottom: 28px;
+}
+.tc-features { list-style: none; }
+.tc-features li {
+  font-family: var(--ff-serif); font-size: 0.97rem;
+  font-weight: 300; font-style: italic; color: var(--cream-dim);
+  padding: 10px 0; border-bottom: 1px solid rgba(201,168,76,0.1);
+  display: flex; align-items: center; gap: 14px;
+}
+.tc-features li::before {
+  content: ''; width: 4px; height: 4px;
+  background: var(--gold); transform: rotate(45deg); flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────────
+   § VIII — RESERVAS
+───────────────────────────────────────────── */
+#reservas { background: var(--wine-deep); padding: 140px 0; }
+.res-hdr { text-align: center; max-width: 640px; margin: 0 auto 90px; }
+.res-hdr .ornament { justify-content: center; }
+.res-hdr .t-body { margin-top: 24px; color: var(--cream-dim); }
+.res-box {
+  max-width: 960px; margin: 0 auto;
+  border: 1px solid rgba(201,168,76,0.18);
+  background: rgba(22,3,6,0.4);
+}
+.res-info-row {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid rgba(201,168,76,0.12);
+}
+.res-info-cell { padding: 40px 52px; border-right: 1px solid rgba(201,168,76,0.12); }
+.res-info-cell:last-child { border-right: none; }
+.ric-label {
+  font-size: 0.55rem; font-weight: 300;
+  letter-spacing: 0.42em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 12px;
+}
+.ric-text {
+  font-family: var(--ff-serif); font-size: 1rem;
+  font-weight: 300; font-style: italic;
+  line-height: 1.8; color: var(--cream-dim);
+}
+.res-calendar-ph {
+  padding: 80px 52px; text-align: center;
+  border-bottom: 1px solid rgba(201,168,76,0.12);
+}
+.rcp-label {
+  font-size: 0.55rem; letter-spacing: 0.42em;
+  text-transform: uppercase; color: rgba(201,168,76,0.38); margin-bottom: 14px;
+}
+.rcp-frame {
+  border: 1px dashed rgba(201,168,76,0.2);
+  padding: 60px 40px;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 10px;
+}
+.rcp-frame .ph-title {
+  font-family: var(--ff-serif); font-size: 1.15rem;
+  font-style: italic; color: rgba(201,168,76,0.45);
+}
+.rcp-frame .ph-sub {
+  font-size: 0.6rem; letter-spacing: 0.3em;
+  color: rgba(201,168,76,0.25); text-transform: uppercase;
+}
+.res-cta-row {
+  padding: 48px 52px;
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 24px;
+}
+.res-email {
+  font-family: var(--ff-serif); font-size: 1rem;
+  font-style: italic; color: var(--cream-dim);
+}
+
+/* ─────────────────────────────────────────────
+   § IX — ALIADOS
+───────────────────────────────────────────── */
+#aliados { background: var(--cream); padding: 120px 0; color: var(--black); }
+#aliados .t-eyebrow { color: var(--navy-mid); }
+#aliados .t-display { color: var(--navy-mid); }
+#aliados .orn-diamond { border-color: var(--navy-mid); }
+#aliados .orn-diamond.fill { background: var(--navy-mid); border-color: var(--navy-mid); }
+#aliados .orn-line { background: linear-gradient(90deg, transparent, var(--navy-mid)); }
+#aliados .orn-line.rev { background: linear-gradient(90deg, var(--navy-mid), transparent); }
+.ali-hdr { text-align: center; max-width: 600px; margin: 0 auto 80px; }
+.ali-hdr .ornament { justify-content: center; }
+.ali-grid {
+  display: grid; grid-template-columns: repeat(5,1fr);
+  gap: 1px; background: #D8CCBA;
+}
+.ali-card {
+  background: var(--cream); padding: 44px 28px;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 10px; text-align: center;
+  transition: background 0.4s;
+}
+.ali-card:hover { background: #EDE6D0; }
+.ali-avatar {
+  width: 64px; height: 64px;
+  border: 1px solid rgba(7,17,29,0.2);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 6px; flex-shrink: 0;
+}
+.ali-avatar span {
+  font-family: var(--ff-serif); font-size: 1rem;
+  font-weight: 500; color: rgba(7,17,29,0.32);
+}
+.ali-role {
+  font-size: 0.5rem; font-weight: 300;
+  letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold);
+}
+.ali-name {
+  font-family: var(--ff-serif); font-size: 1.05rem;
+  font-weight: 500; color: var(--navy-mid);
+}
+
+/* ─────────────────────────────────────────────
+   FOOTER
+───────────────────────────────────────────── */
+footer {
+  background: var(--black); padding: 80px 0 0;
+  border-top: 1px solid rgba(201,168,76,0.14);
+}
+.footer-inner { max-width: 1380px; margin: 0 auto; padding: 0 72px; }
+.footer-main {
+  display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr;
+  gap: 60px; padding-bottom: 64px;
+  border-bottom: 1px solid rgba(201,168,76,0.1);
+}
+.f-brand-logo { height: 54px; margin-bottom: 24px; opacity: 0.85; }
+.f-brand-tag {
+  font-family: var(--ff-serif); font-size: 1rem; font-style: italic;
+  font-weight: 300; color: rgba(245,239,224,0.4);
+  line-height: 1.8; max-width: 260px;
+}
+.f-col-title {
+  font-size: 0.52rem; font-weight: 300;
+  letter-spacing: 0.42em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 24px;
+}
+.f-col ul { list-style: none; }
+.f-col ul li { margin-bottom: 12px; }
+.f-col ul li a {
+  font-family: var(--ff-serif); font-size: 0.97rem;
+  font-style: italic; font-weight: 300;
+  color: rgba(245,239,224,0.4); transition: color 0.3s;
+}
+.f-col ul li a:hover { color: var(--gold); }
+.f-col p {
+  font-family: var(--ff-serif); font-size: 0.97rem; font-style: italic;
+  font-weight: 300; color: rgba(245,239,224,0.4); line-height: 1.85;
+}
+.f-col a {
+  font-family: var(--ff-serif); font-size: 0.97rem; font-style: italic;
+  color: rgba(245,239,224,0.4); transition: color 0.3s;
+  display: block; margin-top: 6px;
+}
+.f-col a:hover { color: var(--gold); }
+.footer-bottom {
+  padding: 28px 0;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.fb-left, .fb-right {
+  font-size: 0.52rem; font-weight: 300;
+  letter-spacing: 0.28em; text-transform: uppercase;
+  color: rgba(245,239,224,0.18);
+}
+
+/* ─────────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .exp-grid, .hist-grid { grid-template-columns: 1fr; gap: 60px; }
+  .ruta-top { grid-template-columns: 1fr; }
+  .ruta-img-panel { min-height: 400px; }
+  .hist-img { order: -1; }
+  .exp-img-wrap img, .hist-img img { height: 400px; }
+  .legado-cards { grid-template-columns: 1fr; }
+  .menu-courses { grid-template-columns: 1fr 1fr; }
+  .ali-grid { grid-template-columns: repeat(3,1fr); }
+  .tar-grid { grid-template-columns: 1fr; }
+  .footer-main { grid-template-columns: 1fr 1fr; }
+  .tren-mood {
+    min-height: auto; padding: 0 28px;
+    display: flex; flex-direction: column; gap: 28px;
+  }
+  .tm-img, .tren-mood-text {
+    position: static !important; width: 100% !important; height: 320px !important;
+  }
+  .tren-mood-text { height: auto !important; order: -1; }
+  .res-info-row { grid-template-columns: 1fr; }
+  .res-info-cell { border-right: none; border-bottom: 1px solid rgba(201,168,76,0.12); }
+  .res-info-cell:last-child { border-bottom: none; }
+  .res-cta-row { flex-direction: column; align-items: flex-start; }
+  .hn-grid { grid-template-columns: 1fr; }
+  .hn-side { min-height: 400px; padding: 56px 40px; }
+  .hn-divider { display: none; }
+}
+@media (max-width: 768px) {
+  #nav { padding: 0 24px; }
+  .nav-links { display: none; }
+  .sec-inner { padding: 0 28px; }
+  #experiencia, #historia, #legado, #menu, #tarifas, #reservas, #aliados { padding: 90px 0; }
+  .tren-mood-sec { padding: 90px 0; }
+  .tm-img { height: 260px !important; }
+  #ruta { padding: 90px 0 0; }
+  .ruta-text { padding: 40px 28px; }
+  .catedral-feature { height: 55vh; }
+  .cf-veil { padding: 48px 28px; }
+  .menu-courses { grid-template-columns: 1fr; }
+  .ali-grid { grid-template-columns: 1fr 1fr; }
+  .footer-main { grid-template-columns: 1fr; gap: 40px; }
+  .footer-inner { padding: 0 28px; }
+  .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+  .menu-chef-strip { padding: 40px 28px; }
+  .tar-card { padding: 44px 32px; }
+  .res-cta-row { padding: 36px 28px; }
+  .res-info-cell { padding: 32px 28px; }
+  .res-calendar-ph { padding: 56px 28px; }
+  #rail-progress { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-bg-img { animation: none; }
+  .hero-logo, .hero-tagline, .hero-sub, .scroll-cue { animation: none; opacity: 1; transform: none; }
+  .hero-sep { animation: none; height: 56px; }
+  .reveal { opacity: 1; transform: none; }
+  .scroll-cue-track { animation: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- RAIL PROGRESS -->
+<nav id="rail-progress" aria-label="Navegación de sección">
+  <div class="rail-dot active" onclick="smoothTo('hero')" title="Inicio"></div>
+  <div class="rail-dot" onclick="smoothTo('experiencia')" title="Experiencia"></div>
+  <div class="rail-dot" onclick="smoothTo('historia')" title="Historia"></div>
+  <div class="rail-dot" onclick="smoothTo('legado')" title="Legado"></div>
+  <div class="rail-dot" onclick="smoothTo('tren')" title="El Tren"></div>
+  <div class="rail-dot" onclick="smoothTo('menu')" title="Menú"></div>
+  <div class="rail-dot" onclick="smoothTo('ruta')" title="La Ruta"></div>
+  <div class="rail-dot" onclick="smoothTo('horario')" title="Día y Noche"></div>
+  <div class="rail-dot" onclick="smoothTo('tarifas')" title="Tarifas"></div>
+  <div class="rail-dot" onclick="smoothTo('reservas')" title="Reservas"></div>
+</nav>
+
+<!-- ══════════════ NAV ══════════════ -->
+<nav id="nav" role="navigation" aria-label="Principal">
+  <a href="#hero" aria-label="1921 Express — Inicio">
+    <img src="./images/ICON.png" alt="1921 Express" class="nav-logo">
+  </a>
+  <ul class="nav-links">
+    <li><a href="#experiencia">La Experiencia</a></li>
+    <li><a href="#historia">La Historia</a></li>
+    <li><a href="#tren">El Tren</a></li>
+    <li><a href="#menu">El Menú</a></li>
+    <li><a href="#ruta">La Ruta</a></li>
+    <li><a href="#tarifas">Tarifas</a></li>
+    <li><a href="#reservas" class="nav-cta">Reservar</a></li>
+  </ul>
+</nav>
+
+<!-- ══════════════ HERO ══════════════ -->
+<section id="hero" class="sec">
+  <video class="hero-bg-img" autoplay muted loop playsinline poster="./images/POSTER.jpg">
+    <source src="./video/hero.mp4" type="video/mp4">
+  </video>
+  <div class="hero-grad" aria-hidden="true"></div>
+  <div class="hero-content">
+    <img src="./images/ICON.png" alt="Logo 1921 Express" class="hero-logo">
+    <div class="hero-sep" aria-hidden="true"></div>
+    <p class="hero-tagline">El primer restaurante itinerante de alta cocina de Colombia</p>
+    <p class="hero-sub">Bogotá &nbsp;·&nbsp; Sabana &nbsp;·&nbsp; Zipaquirá</p>
+  </div>
+  <div class="scroll-cue" role="button" tabindex="0"
+       aria-label="Desplazarse hacia abajo"
+       onclick="smoothTo('experiencia')"
+       onkeydown="if(event.key==='Enter')smoothTo('experiencia')">
+    <span class="scroll-cue-label">Descubrir</span>
+    <div class="scroll-cue-track" aria-hidden="true"></div>
+  </div>
+</section>
+
+<!-- ══════════════ § I — EXPERIENCIA ══════════════ -->
+<section id="experiencia" class="sec">
+  <div class="sec-inner">
+    <div class="exp-grid">
+      <div class="exp-text">
+        <p class="t-eyebrow reveal">I — La Experiencia</p>
+        <div class="ornament reveal d1">
+          <div class="orn-line"></div><div class="orn-diamond fill"></div>
+          <div class="orn-diamond"></div><div class="orn-line rev"></div>
+        </div>
+        <h2 class="t-display reveal d1">Un Viaje en el Tiempo<br><em>sobre Rieles</em></h2>
+        <p class="t-body reveal d2">1921 Express no es solo una cena; es una máquina del tiempo culinaria. Como el primer restaurante itinerante de alta cocina en Colombia, ofrece una velada inmersiva que fusiona la nostalgia del Roaring Twenties con la gastronomía contemporánea.</p>
+        <p class="t-body reveal d2">Disfrute de música en vivo, mixología de autor y un menú con el sello de estrellas Michelin, todo mientras los paisajes de la Sabana de Bogotá se deslizan suavemente por su ventana.</p>
+        <a href="#reservas" class="btn-outline reveal d3">Reserve su Pasaje</a>
+      </div>
+      <div class="exp-img-wrap reveal d2">
+        <img src="./images/TRAIN_WINDOW.jpg" alt="Mesa servida en el 1921 Express">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ § II — HISTORIA ══════════════ -->
+<section id="historia" class="sec">
+  <div class="sec-inner">
+    <div class="hist-grid">
+      <div class="hist-img reveal">
+        <img src="./images/EXPRESS.png" alt="El 1921 Express de noche en la estación">
+      </div>
+      <div class="hist-text">
+        <p class="t-eyebrow reveal d1">II — La Historia</p>
+        <div class="ornament reveal d2">
+          <div class="orn-line"></div><div class="orn-diamond fill"></div>
+          <div class="orn-diamond"></div><div class="orn-line rev"></div>
+        </div>
+        <h2 class="t-display reveal d2">El Renacimiento del<br><em>Patrimonio Férreo</em></h2>
+        <p class="t-body reveal d3">Nacido de la visión del creador colombiano Alejandro Riaño, este proyecto es un homenaje al glorioso pasado ferroviario del país. Tras un exhaustivo y artesanal proceso de restauración, los históricos vagones del emblemático Tren de la Sabana han vuelto a la vida.</p>
+        <p class="t-body reveal d3">Lo que alguna vez fue un medio de transporte tradicional ha sido transformado en un destino de lujo, capturando el glamour y la sofisticación de la década de 1920 para redefinir la escena gastronómica de la ciudad.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ § III — LEGADO ══════════════ -->
+<section id="legado" class="sec">
+  <div class="sec-inner">
+    <div class="legado-hdr">
+      <p class="t-eyebrow reveal">III — Nuestro Legado</p>
+      <div class="ornament reveal d1">
+        <div class="orn-line"></div><div class="orn-diamond fill"></div>
+        <div class="orn-diamond"></div><div class="orn-line rev"></div>
+      </div>
+      <h2 class="t-display reveal d1">Cien Años de Historia<br><em>Sobre Rieles</em></h2>
+    </div>
+    <div class="legado-cards">
+      <div class="legado-card reveal">
+        <div class="lc-era">XIX</div>
+        <h3 class="lc-title">El Origen del Viaje</h3>
+        <p class="lc-body">El origen del viaje se remonta al siglo XIX, pero nos llamamos 1921 porque fue en esa década cuando la Sabana de Bogotá se consolidó como el gran nodo férreo que conectó el corazón andino con el mundo. Fue el año en que rompimos el aislamiento gracias al vapor.</p>
+      </div>
+      <div class="legado-card reveal d1">
+        <div class="lc-era">1921</div>
+        <h3 class="lc-title">Rescatando la Gloria</h3>
+        <p class="lc-body">De la era dorada de los Ferrocarriles Nacionales rescatamos una reliquia: el antiguo coche oficial que transportaba a los presidentes de la República. Nos tomó tres años de paciencia curar el olvido del tiempo.</p>
+      </div>
+      <div class="legado-card reveal d2">
+        <div class="lc-era">Hoy</div>
+        <h3 class="lc-title">Sofisticación Real</h3>
+        <p class="lc-body">En los años 20, la mesa del tren era un ritual de distinción con vajillas importadas. Hoy revivimos esa sofisticación honrando la tierra con alta cocina creada estrictamente con producto local colombiano.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ § IV — EL TREN (moodboard collage) ══════════════ -->
+<section id="tren" class="sec tren-mood-sec">
+  <div class="tren-mood">
+
+    <div class="tm-img tm-img-1 reveal">
+      <img src="./images/TRAIN_LIGHTS.jpg" alt="Lamparillas doradas del vagón 1921 Express">
+    </div>
+    <div class="tm-img tm-img-2 reveal d1">
+      <img src="./images/INTERIOR.jpg" alt="Salón comedor del 1921 Express">
+    </div>
+    <div class="tm-img tm-img-3 reveal d2">
+      <img src="./images/TRAIN_INTERIOR.jpg" alt="Mesa lista en el vagón">
+    </div>
+    <div class="tm-img tm-img-4 reveal d1">
+      <img src="./images/TRAIN_ITEMS.jpg" alt="Detalles dorados de la vajilla">
+    </div>
+
+    <div class="tren-mood-text reveal">
+      <p class="t-eyebrow">IV — El Tren</p>
+      <div class="ornament">
+        <div class="orn-line"></div><div class="orn-diamond fill"></div>
+        <div class="orn-diamond"></div><div class="orn-line rev"></div>
+      </div>
+      <h2 class="t-display" style="font-size:clamp(1.9rem,3.6vw,3.2rem); margin-top:16px;">Ingeniería,<br><em>Lujo y Confort</em></h2>
+      <div class="detail-items">
+        <div class="detail-item">
+          <div class="di-bar"></div>
+          <div>
+            <p class="di-title">Materiales Nobles</p>
+            <p class="di-body">Interiores revestidos en maderas de caoba pulida, detalles en bronce reluciente y tapicería de terciopelo que evocan los legendarios expresos europeos.</p>
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="di-bar"></div>
+          <div>
+            <p class="di-title">El Salón Comedor</p>
+            <p class="di-body">Diseñado para la comodidad absoluta. Luz íntima, asientos de cuero, vajilla con ribete de oro y vistas privilegiadas a los paisajes de la Sabana bogotana.</p>
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="di-bar"></div>
+          <div>
+            <p class="di-title">El Speakeasy Acústico</p>
+            <p class="di-body">Un bar clandestino sobre ruedas. La luz cálida del art déco acompaña las notas del jazz en vivo. El glamour de los años 20, redefinido para el presente.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════ § V — MENÚ ══════════════ -->
+<section id="menu" class="sec">
+  <div class="sec-inner">
+    <div class="menu-hdr">
+      <p class="t-eyebrow reveal">V — El Menú</p>
+      <div class="ornament reveal d1">
+        <div class="orn-line"></div><div class="orn-diamond fill" style="border-color:var(--navy-mid);background:var(--navy-mid);"></div>
+        <div class="orn-diamond" style="border-color:var(--navy-mid);"></div><div class="orn-line rev"></div>
+      </div>
+      <h2 class="t-display reveal d1">Arte Culinario<br><em>en Movimiento</em></h2>
+    </div>
+    <div class="menu-courses">
+      <div class="mc reveal">
+        <div class="mc-num">01</div>
+        <p class="mc-label">Primer Tiempo</p>
+        <h3 class="mc-title">Amuse-Bouche</h3>
+        <p class="mc-body">Una composición de temporada para despertar el paladar. El preludio perfecto de una sinfonía gastronómica diseñada para sorprender y seducir.</p>
+      </div>
+      <div class="mc reveal d1">
+        <div class="mc-num">02</div>
+        <p class="mc-label">Segundo Tiempo</p>
+        <h3 class="mc-title">Las Entradas</h3>
+        <p class="mc-body">Un homenaje a los ingredientes locales frescos, tratados con técnicas de vanguardia que revelan su esencia más pura y honesta.</p>
+      </div>
+      <div class="mc reveal d2">
+        <div class="mc-num">03</div>
+        <p class="mc-label">Plato Principal</p>
+        <h3 class="mc-title">Alta Cocina</h3>
+        <p class="mc-body">Cortes de carne madurada, pesca del día y creaciones de autor que celebran la riqueza de la tierra colombiana con técnica europea.</p>
+      </div>
+      <div class="mc reveal d3">
+        <div class="mc-num">04</div>
+        <p class="mc-label">El Cierre</p>
+        <h3 class="mc-title">Repostería Fina</h3>
+        <p class="mc-body">Un final que perdura. Repostería de precisión acompañada de una selecta carta de digestivos y café de origen colombiano.</p>
+      </div>
+    </div>
+    <div class="menu-chef-strip reveal">
+      <p class="mcs-eyebrow">Chef Ejecutivo — Estrellas Michelin</p>
+      <h3 class="mcs-name">Pasquale Cozzolino</h3>
+      <p class="mcs-desc">Chef italiano galardonado con estrellas Michelin · Creador de una propuesta gastronómica que desafía las reglas de la cocina tradicional<br>fusionando la técnica italiana con el producto local colombiano</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ § VI — LA RUTA (interactive) ══════════════ -->
+<section id="ruta" class="sec">
+  <div class="ruta-top">
+
+    <!-- Interactive image panel -->
+    <div class="ruta-img-panel">
+      <img class="rp-img active" id="rp-img-usa"    src="./images/USAQUEN.jpg"  alt="Estación de Usaquén">
+      <img class="rp-img"        id="rp-img-sabana"  src="./images/SABANA.jpg"  alt="Sabana de Bogotá">
+      <img class="rp-img"        id="rp-img-castle"  src="./images/CASTILLO.jpg" alt="Castillo Marroquín">
+      <img class="rp-img"        id="rp-img-chia"    src="./images/CHIA.jpg"      alt="Chía">
+      <img class="rp-img"        id="rp-img-cajica"  src="./images/CAJICA.jpg"    alt="Cajicá">
+      <img class="rp-img"        id="rp-img-zip"     src="./images/ZIPAQUIRA.jpg" alt="Zipaquirá">
+      <div class="ruta-img-overlay" aria-hidden="true"></div>
+      <div class="ruta-img-caption" id="ruta-caption">
+        <p class="ric-loc" id="ruta-caption-loc">Punto de Partida</p>
+        <p class="ric-name" id="ruta-caption-name">Estación Usaquén</p>
+      </div>
+    </div>
+
+    <!-- Stops list -->
+    <div class="ruta-text">
+      <div class="ruta-text-hdr">
+        <p class="t-eyebrow reveal">VI — La Ruta y el Paisaje</p>
+        <div class="ornament reveal d1">
+          <div class="orn-line" style="width:50px"></div><div class="orn-diamond fill"></div>
+          <div class="orn-diamond"></div><div class="orn-line rev" style="width:50px"></div>
+        </div>
+        <h2 class="t-display reveal d1" style="font-size:clamp(1.8rem,3.8vw,3.2rem);">De las Luces de la Ciudad<br><em>a la Cuna de la Sabana</em></h2>
+      </div>
+
+      <div class="route-stops reveal d2">
+        <div class="route-track" aria-hidden="true"></div>
+
+        <div class="route-stop rs-active" data-stop="usa" data-loc="Punto de Partida" data-name="Estación Usaquén">
+          <div class="rs-dot-wrap"><div class="rs-dot"></div></div>
+          <div>
+            <p class="rs-name">Estación Usaquén</p>
+            <p class="rs-desc">El abordaje se realiza en la icónica Estación de Usaquén. La aventura comienza al caer la noche, entre el aroma del café y el tintineo de las copas de cristal.</p>
+          </div>
+        </div>
+
+        <div class="route-stop" data-stop="sabana" data-loc="La Travesía" data-name="Sabana de Bogotá">
+          <div class="rs-dot-wrap"><div class="rs-dot"></div></div>
+          <div>
+            <p class="rs-name">Sabana de Bogotá</p>
+            <p class="rs-desc">Al dejar la capital, las luces urbanas ceden el paso a la serena neblina y los campos abiertos del altiplano. La Sabana se extiende como un lienzo de esmeraldas bajo la noche.</p>
+          </div>
+        </div>
+
+        <div class="route-stop" data-stop="castle" data-loc="El Patrimonio" data-name="Castillo Marroquín">
+          <div class="rs-dot-wrap"><div class="rs-dot"></div></div>
+          <div>
+            <p class="rs-name">Castillo Marroquín</p>
+            <p class="rs-desc">Desde las vías puede apreciarse la silueta del Castillo Marroquín, majestuosa residencia neogótica del siglo XIX construida por el expresidente José Manuel Marroquín. Una joya arquitectónica que evoca los tiempos en que el tren era símbolo de progreso y distinción.</p>
+          </div>
+        </div>
+
+        <div class="route-stop" data-stop="chia" data-loc="La Sabana Viva" data-name="Chía">
+          <div class="rs-dot-wrap"><div class="rs-dot"></div></div>
+          <div>
+            <p class="rs-name">Chía</p>
+            <p class="rs-desc">Las vías se deslizan junto a la pintoresca población de Chía, conocida por sus flores, sus mercados artesanales y la serenidad de su vida rural. Un respiro de Colombia profunda en el corazón del altiplano.</p>
+          </div>
+        </div>
+
+        <div class="route-stop" data-stop="cajica" data-loc="Tierra de Tejidos" data-name="Cajicá">
+          <div class="rs-dot-wrap"><div class="rs-dot"></div></div>
+          <div>
+            <p class="rs-name">Cajicá</p>
+            <p class="rs-desc">El tren pasa suavemente junto a Cajicá, pueblo colonial de arquitectura blanca donde la tranquilidad del altiplano se hace sentir con toda su serenidad. Famosa por sus tejidos y la hospitalidad de su gente, es una pausa de encanto en el trayecto.</p>
+          </div>
+        </div>
+
+        <div class="route-stop" data-stop="zip" data-loc="El Destino" data-name="Zipaquirá">
+          <div class="rs-dot-wrap"><div class="rs-dot"></div></div>
+          <div>
+            <p class="rs-name">Zipaquirá</p>
+            <p class="rs-desc">El corazón patrimonial de la región. Es en las cercanías de este imponente destino, hogar de la Catedral de Sal, donde la velada del 1921 Express alcanza su máxima expresión gastronómica y emocional.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Catedral de Sal feature -->
+  <div class="catedral-feature">
+    <img class="cf-img" src="./images/SALT_CATHEDRAL_2.jpeg" alt="Interior de la Catedral de Sal de Zipaquirá" loading="lazy">
+    <div class="cf-veil">
+      <p class="t-eyebrow reveal" style="margin-bottom:16px;">El Destino — Zipaquirá</p>
+      <h2 class="t-display reveal d1">La Catedral de Sal<br><em>Primera Maravilla de Colombia</em></h2>
+      <p class="t-body reveal d2">Esculpida en las profundidades de la tierra. Es aquí donde la velada del 1921 Express alcanza su máxima expresión gastronómica y emocional, bajo la majestuosa bóveda de sal más hermosa del mundo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ § VI.5 — DÍA Y NOCHE ══════════════ -->
+<section id="horario" class="sec">
+  <div class="hn-grid">
+
+    <!-- DAY SIDE: wine red -->
+    <div class="hn-side day">
+      <img class="hn-bg" src="./images/DAY_TRAIN.jpg" alt="El 1921 Express de día">
+      <div class="hn-divider" aria-hidden="true"></div>
+      <div class="hn-content">
+        <div class="hn-ornament-bar"></div>
+        <p class="hn-label">Jornada Diurna</p>
+        <h2 class="hn-title">La Experiencia<br><em>de Día</em></h2>
+        <p class="hn-body">Bajo la luz dorada de la Sabana, el 1921 Express opera también en horario diurno. El paisaje andino cobra protagonismo mientras el menú del mediodía celebra los colores y sabores más vivos de Colombia. Una experiencia diferente, igualmente sublime: la luz natural bailando sobre los campos abiertos, el verde del altiplano recortado contra las nubes blancas, y la misma mesa impecable que en la noche.</p>
+        <p class="hn-icon">Abordaje en Estación Usaquén &nbsp;·&nbsp; Almuerzo de 4 tiempos</p>
+      </div>
+    </div>
+
+    <!-- NIGHT SIDE: midnight navy -->
+    <div class="hn-side night">
+      <img class="hn-bg" src="./images/NIGHT_TRAIN.jpg" alt="El 1921 Express de noche">
+      <div class="hn-content">
+        <div class="hn-ornament-bar"></div>
+        <p class="hn-label">Jornada Nocturna</p>
+        <h2 class="hn-title">La Experiencia<br><em>de Noche</em></h2>
+        <p class="hn-body">Es en la noche donde el 1921 Express alcanza su máxima magia. Las lamparillas de latón se encienden, el jazz llena el vagón, y los campos de la Sabana se convierten en un lienzo de estrellas. La cena de cuatro tiempos transcurre entre luces íntimas y el ritmo suave de los rieles, mientras la vida urbana queda atrás y el tiempo se detiene.</p>
+        <p class="hn-icon">Abordaje en Estación Usaquén &nbsp;·&nbsp; Cena de 4 tiempos</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════ § VII — TARIFAS ══════════════ -->
+<section id="tarifas" class="sec">
+  <div class="sec-inner">
+    <div class="tar-hdr">
+      <p class="t-eyebrow reveal">VII — Tarifas</p>
+      <div class="ornament reveal d1">
+        <div class="orn-line"></div><div class="orn-diamond fill"></div>
+        <div class="orn-diamond"></div><div class="orn-line rev"></div>
+      </div>
+      <h2 class="t-display reveal d1">Asegure<br><em>su Pasaje</em></h2>
+      <p class="t-body reveal d2">Una experiencia irrepetible. Disponibilidad limitada a partir de Agosto de 2026.</p>
+    </div>
+    <div class="tar-grid">
+      <div class="tar-card reveal">
+        <p class="tc-label">Experiencia Completa</p>
+        <h3 class="tc-title">1921 Express</h3>
+        <div class="tc-price">Valor por<br>Confirmar</div>
+        <p class="tc-note">Por persona · Cena de 4 tiempos + recorrido férreo completo Bogotá — Zipaquirá</p>
+        <ul class="tc-features">
+          <li>Cena de 4 tiempos — menú Michelin</li>
+          <li>Recorrido Bogotá · Sabana · Zipaquirá</li>
+          <li>Música en vivo · Jazz &amp; Swing</li>
+          <li>Mixología de autor incluida</li>
+          <li>Acceso al salón comedor principal</li>
+        </ul>
+      </div>
+      <div class="tar-card reveal d1">
+        <p class="tc-label">Upgrade Premium</p>
+        <h3 class="tc-title">Maridaje de Autor</h3>
+        <div class="tc-price">Valor por<br>Confirmar</div>
+        <p class="tc-note">Adicional · Selección de vinos y licores de autor maridados con cada tiempo del menú</p>
+        <ul class="tc-features">
+          <li>Maridaje de 4 tiempos seleccionado</li>
+          <li>Vinos de colección importados</li>
+          <li>Acceso exclusivo al Speakeasy</li>
+          <li>Carta de digestivos y café de origen</li>
+          <li>Sommelier de acompañamiento</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ § VIII — RESERVAS ══════════════ -->
+<section id="reservas" class="sec">
+  <div class="sec-inner">
+    <div class="res-hdr">
+      <p class="t-eyebrow reveal">VIII — Reservas</p>
+      <div class="ornament reveal d1">
+        <div class="orn-line"></div><div class="orn-diamond fill"></div>
+        <div class="orn-diamond"></div><div class="orn-line rev"></div>
+      </div>
+      <h2 class="t-display reveal d1">El Abordaje<br><em>Comienza Aquí</em></h2>
+      <p class="t-body reveal d2">Sea parte de las primeras personas en vivir esta experiencia irrepetible. Seleccione su fecha y número de pasajeros.</p>
+    </div>
+    <div class="res-box reveal">
+      <div class="res-info-row">
+        <div class="res-info-cell">
+          <p class="ric-label">Disponibilidad</p>
+          <p class="ric-text">A partir de Agosto de 2026. Fechas seleccionadas — disponibilidad exclusiva y limitada por temporada.</p>
+        </div>
+        <div class="res-info-cell">
+          <p class="ric-label">Política de Ingreso</p>
+          <p class="ric-text">Exclusivo para mayores de edad. Domingos y festivos: abierto a mayores de 10 años debidamente acompañados.</p>
+        </div>
+      </div>
+      <div class="res-calendar-ph">
+        <p class="rcp-label">Sistema de Calendario y Preventa</p>
+        <div class="rcp-frame">
+          <p class="ph-title">— El módulo de reservas será integrado próximamente —</p>
+          <p class="ph-sub">Plataforma de preventa · Calendario de fechas · Selección de pasajeros</p>
+        </div>
+      </div>
+      <div class="res-cta-row">
+        <p class="res-email">Para preventa: reservas@1921express.com</p>
+        <a href="mailto:reservas@1921express.com" class="btn-outline" style="margin-top:0;">Contactar para Preventa</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ § IX — ALIADOS ══════════════ -->
+<section id="aliados" class="sec">
+  <div class="sec-inner">
+    <div class="ali-hdr">
+      <p class="t-eyebrow reveal">IX — Aliados y Creadores</p>
+      <div class="ornament reveal d1">
+        <div class="orn-line"></div><div class="orn-diamond fill" style="border-color:var(--navy-mid);background:var(--navy-mid);"></div>
+        <div class="orn-diamond" style="border-color:var(--navy-mid);"></div><div class="orn-line rev"></div>
+      </div>
+      <h2 class="t-display reveal d1">Nuestros Aliados<br><em>y Creadores</em></h2>
+    </div>
+    <div class="ali-grid">
+      <div class="ali-card reveal">
+        <div class="ali-avatar"><span>AR</span></div>
+        <p class="ali-role">Creador · Director Creativo</p>
+        <p class="ali-name">Alejandro Riaño</p>
+      </div>
+      <div class="ali-card reveal d1">
+        <div class="ali-avatar"><span>PC</span></div>
+        <p class="ali-role">Chef Ejecutivo ⭐ Michelin</p>
+        <p class="ali-name">Pasquale Cozzolino</p>
+      </div>
+      <div class="ali-card reveal d2">
+        <div class="ali-avatar"><span>TS</span></div>
+        <p class="ali-role">Operador · Patrimonio Férreo</p>
+        <p class="ali-name">Tren de la Sabana</p>
+      </div>
+      <div class="ali-card reveal d3">
+        <div class="ali-avatar"><span style="font-size:1.4rem;color:rgba(7,17,29,0.2);">+</span></div>
+        <p class="ali-role">Sponsor Oficial · Mixología</p>
+        <p class="ali-name">Por Confirmar</p>
+      </div>
+      <div class="ali-card reveal d3">
+        <div class="ali-avatar"><span style="font-size:1.4rem;color:rgba(7,17,29,0.2);">+</span></div>
+        <p class="ali-role">Sponsor Oficial · Experiencias</p>
+        <p class="ali-name">Por Confirmar</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-main">
+      <div>
+        <img src="./images/ICON.png" alt="1921 Express" class="f-brand-logo">
+        <p class="f-brand-tag">El primer restaurante itinerante de alta cocina de Colombia. Una máquina del tiempo culinaria sobre rieles.</p>
+      </div>
+      <div class="f-col">
+        <p class="f-col-title">Navegación</p>
+        <ul>
+          <li><a href="#experiencia">La Experiencia</a></li>
+          <li><a href="#historia">La Historia</a></li>
+          <li><a href="#tren">El Tren</a></li>
+          <li><a href="#menu">El Menú</a></li>
+          <li><a href="#ruta">La Ruta</a></li>
+          <li><a href="#horario">Día y Noche</a></li>
+          <li><a href="#tarifas">Tarifas</a></li>
+          <li><a href="#reservas">Reservas</a></li>
+        </ul>
+      </div>
+      <div class="f-col">
+        <p class="f-col-title">Punto de Partida</p>
+        <p>Estación Usaquén<br>Kra 9 # 110-08<br>Bogotá D.C., Colombia</p>
+      </div>
+      <div class="f-col">
+        <p class="f-col-title">Contacto</p>
+        <p>reservas@1921express.com</p>
+        <p style="margin-top:12px;">+57 (XXX) XXX-XXXX</p>
+        <a href="https://instagram.com/1921express" style="color:var(--gold);font-style:normal;font-size:0.6rem;letter-spacing:0.4em;text-transform:uppercase;margin-top:20px;" target="_blank" rel="noopener">@1921express</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="fb-left">© 2026 · 1921 Express · Todos los derechos reservados · Bogotá D.C., Colombia</p>
+      <p class="fb-right">Una experiencia de Alejandro Riaño · Chef Pasquale Cozzolino</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════ SCRIPTS ══════════════ -->
+<script>
+(function() {
+
+  /* ── Nav scroll ── */
+  var nav = document.getElementById('nav');
+  window.addEventListener('scroll', function() {
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+  }, { passive: true });
+
+  /* ── Scroll Reveal ── */
+  var reveals = document.querySelectorAll('.reveal');
+  var revealObs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        revealObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -56px 0px' });
+  reveals.forEach(function(el) { revealObs.observe(el); });
+
+  /* ── Rail progress ── */
+  var railNav = document.getElementById('rail-progress');
+  var railDots = document.querySelectorAll('.rail-dot');
+  var sections = ['hero','experiencia','historia','legado','tren','menu','ruta','horario','tarifas','reservas'];
+  window.addEventListener('scroll', function() {
+    railNav.classList.toggle('show', window.scrollY > 200);
+    var current = 0;
+    sections.forEach(function(id, i) {
+      var el = document.getElementById(id);
+      if (el && el.getBoundingClientRect().top <= window.innerHeight * 0.45) current = i;
+    });
+    railDots.forEach(function(d, i) { d.classList.toggle('active', i === current); });
+  }, { passive: true });
+
+  /* ── Smooth scroll ── */
+  window.smoothTo = function(id) {
+    var el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+  document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+    a.addEventListener('click', function(e) {
+      var target = document.querySelector(this.getAttribute('href'));
+      if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+    });
+  });
+
+  /* ── Interactive Route Map ── */
+  var stopImgs = {
+    usa:    { imgId: 'rp-img-usa',    loc: 'Punto de Partida',  name: 'Estación Usaquén'    },
+    sabana: { imgId: 'rp-img-sabana', loc: 'La Travesía',       name: 'Sabana de Bogotá'    },
+    castle: { imgId: 'rp-img-castle', loc: 'El Patrimonio',     name: 'Castillo Marroquín'  },
+    chia:   { imgId: 'rp-img-chia',   loc: 'La Sabana Viva',    name: 'Chía'                },
+    cajica: { imgId: 'rp-img-cajica', loc: 'Tierra de Tejidos', name: 'Cajicá'              },
+    zip:    { imgId: 'rp-img-zip',    loc: 'El Destino',        name: 'Zipaquirá'           }
+  };
+
+  var currentStop = 'usa';
+  var captionEl   = document.getElementById('ruta-caption');
+  var captionLoc  = document.getElementById('ruta-caption-loc');
+  var captionName = document.getElementById('ruta-caption-name');
+
+  function activateStop(key) {
+    if (key === currentStop) return;
+    /* fade out old image */
+    var oldImg = document.getElementById(stopImgs[currentStop].imgId);
+    if (oldImg) oldImg.classList.remove('active');
+    /* fade out caption */
+    captionEl.classList.remove('show');
+    currentStop = key;
+    /* fade in new image */
+    setTimeout(function() {
+      var newImg = document.getElementById(stopImgs[key].imgId);
+      if (newImg) newImg.classList.add('active');
+      captionLoc.textContent  = stopImgs[key].loc;
+      captionName.textContent = stopImgs[key].name;
+      captionEl.classList.add('show');
+    }, 340);
+  }
+
+  /* Show caption on first load */
+  setTimeout(function() { captionEl.classList.add('show'); }, 800);
+
+  document.querySelectorAll('.route-stop').forEach(function(stop) {
+    function activate() {
+      document.querySelectorAll('.route-stop').forEach(function(s) { s.classList.remove('rs-active'); });
+      stop.classList.add('rs-active');
+      activateStop(stop.dataset.stop);
+    }
+    stop.addEventListener('mouseenter', activate);
+    stop.addEventListener('click',      activate);
+    stop.addEventListener('focus',      activate);
+    stop.setAttribute('tabindex', '0');
+  });
+
+})();
+</script>
+</body>
+</html>
